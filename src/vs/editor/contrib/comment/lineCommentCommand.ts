@@ -139,8 +139,26 @@ export class LineCommentCommand implements ICommand {
 			if (lineContentStartOffset === -1) {
 				// Empty or whitespace only line
 				lineData.ignore = ignoreEmptyLines;
-				lineData.commentStrOffset = lineContent.length;
+				// special case for when your also commenting empty lines that aren't tabbed correctly
+				if (lineCount > 1 && lineContent === '' && !ignoreEmptyLines) {
+					if (i !== 0) {
+						lineData.commentStrOffset = lines[i - 1].commentStrOffset;
+					}
+					else {
+						lineData.commentStrOffset = -1;
+					}
+				}
+				else {
+					lineData.commentStrOffset = lineContent.length;
+				}
+
+
 				continue;
+			}
+
+			// handle the case where the first stroffset is -1
+			if (lines[0].commentStrOffset === -1 && lines.length > 1) {
+				lines[0] = lines[lines.length - 1];
 			}
 
 			onlyWhitespaceLines = false;
